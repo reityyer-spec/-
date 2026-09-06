@@ -1,140 +1,514 @@
-H☆SHI
-欲しいを、あきらめない。
-{{ user.username[0]|upper }}
-{% if view == 'home' %}
-☆
-✦
-✧
-H☆SHI
-買いに行けない「欲しい」を、 行ける誰かにつなぐ。
-ファッション・POPUP・限定商品を中心に、欲しい人と代行できる人をつなぐショッピング代行サービス。
-＋ 投稿する検索する
-おすすめフォロー中
-{% for p in posts %}
-{{ p.username[0]|upper }}
-@{{p.username}} {% if p.verified %}✓{% endif %}
-⭐ {{'%.2f'|format(p.rating)}} ・ {{p.location or '場所未定'}}
-{{'代行依頼' if p.post_type=='request' else '代行可能'}}
-{{p.title}}
-{{p.body}}
-代行費¥{{"{:,}".format(p.proxy_fee)}}
-♡ {{p.likes_count}}
-💬 {{p.comments_count}}詳細を見る →
-{% else %}
-まだ投稿がありません ☆
-{% endfor %}
-{% elif view == 'search' %}
-検索
-ブランド・場所・イベント名から探せます。
-{{q}}検索
-{% for p in posts %}
-{{p.username[0]|upper}}
-@{{p.username}}
-{{p.location}} ・ {{p.target_date}}
-{{'代行依頼' if p.post_type=='request' else '代行可能'}}
-{{p.title}}
-{{p.body}}
-代行費¥{{"{:,}".format(p.proxy_fee)}}
-{% else %}
-キーワードを入れて検索してね ☆
-{% endfor %}
-{% elif view == 'new_post' %}
-投稿する
-「代行依頼」も「代行可能」もここから投稿できます。
-投稿タイプ代行依頼代行可能タイトル内容
-場所日付
-商品予定価格代行費
-投稿する ☆
-{% elif view == 'detail' %}
-投稿詳細
-{{post.username[0]|upper}}
-@{{post.username}} ✓
-⭐ {{post.rating}} ・ 成立率 {{post.success_rate}}%
-{{'代行依頼' if post.post_type=='request' else '代行可能'}}
-{{post.title}}
-{{post.body}}
-場所{{post.location or '-'}}
-日付{{post.target_date or '-'}}
-代行費¥{{"{:,}".format(post.proxy_fee)}}
-応募する
-提案する代行費メッセージ応募を送る
-{% for a in applications %}
-@{{a.username}}⭐ {{a.rating}} / 成立率 {{a.success_rate}}%¥{{"{:,}".format(a.fee_offer)}}
-{% endfor %}
-コメント
-{% for c in comments %}
-@{{c.username}} {{c.body}}
-{% else %}
-まだコメントはありません。
-{% endfor %}
-送信
-{% elif view == 'transactions' %}
-取引
-進行中の取引を確認できます。
-{% for tx in transactions %}
-☆
-{{tx.title}}
-依頼者 @{{tx.requester_name}} / 代行者 @{{tx.agent_name}}
-{{tx.status}}
-合計予定¥{{"{:,}".format(tx.product_price + tx.proxy_fee + tx.platform_fee + tx.shipping_estimate)}}
-取引を見る →チャット
-{% else %}
-取引はまだありません。
-{% endfor %}
-{% elif view == 'transaction' %}
-取引画面
-{{'依頼者側' if role=='requester' else '代行者側'}}ビュー
-依頼者側代行者側
-{{tx.title}}{{tx.status}}
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>H☆SHI v0.3.2</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="/">H<span>☆</span>SHI</a>
+    <div class="tagline">欲しいを、あきらめない。</div>
+    <a class="avatarMini" href="/profile">{{ user.username[0]|upper }}</a>
+  </header>
 
-商品代¥{{"{:,}".format(tx.product_price)}}
-代行費¥{{"{:,}".format(tx.proxy_fee)}}
-H☆SHI手数料 5.5%¥{{"{:,}".format(tx.platform_fee)}}
-送料見込み¥{{"{:,}".format(tx.shipping_estimate)}}
-{% if role == 'requester' %}
-購入証明
-{{'✓ レシート添付済み' if tx.receipt_attached else '未添付'}}
-商品写真
-{% for p in proofs if p.kind=='item_photo' %}{% else %}
-☆正面
-☆背面
-☆付属品
-{% endfor %}
-チャットを開く
-{% else %}
-購入証明を添付
-レシート/決済明細を添付
-商品写真を添付
-商品写真を追加
-配送先
-東京都 ○○区 ○○ 1-2-3
-取引中のみ表示。取引終了後は非表示。
-手渡し/ロッカー 6桁コード {{tx.delivery_code}}
-チャットを開く
-{% endif %} {% elif view == 'chat' %}
-チャット
-{{tx.title}}
-@{{tx.requester_name}}⇄@{{tx.agent_name}}
-{% for m in messages %}
-@{{m.username}}
-{{m.body}}
-{% else %}
-まだメッセージはありません。
-{% endfor %}
-送信
-取引画面へ戻る
-{% elif view == 'profile' %}
-☆
-@{{user.username}}
-本人確認済み ✓
-⭐ {{user.rating}} / 取引成立率 {{user.success_rate}}%
-H☆SHI残高 ¥{{"{:,}".format(user.balance)}}
-自分の投稿
-{% for p in myposts %}
-{{'代行依頼' if p.post_type=='request' else '代行可能'}}{{p.title}}
-{{p.status}}
-{% else %}
-まだ投稿がありません。
-{% endfor %}
-{% endif %}
-⌂ホーム ⌕検索 ＋投稿 ✉取引 ☆マイページ
+  <main class="content">
+
+  {% if view == 'home' %}
+    <section class="hero glass">
+      <div class="heroStar">☆</div>
+      <div class="spark s1">✦</div>
+      <div class="spark s2">✧</div>
+      <div class="eyebrow">H☆SHI</div>
+      <h1>買いに行けない「欲しい」を、<br>行ける誰かにつなぐ。</h1>
+      <p>ファッション・POPUP・限定商品を中心に、欲しい人と代行できる人をつなぐショッピング代行サービス。</p>
+      <div class="heroBtns">
+        <a class="primary" href="/post/new">＋ 投稿する</a>
+        <a class="soft" href="/search">検索する</a>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <a class="{{'active' if tab=='recommended' else ''}}" href="/?tab=recommended">おすすめ</a>
+      <a class="{{'active' if tab=='following' else ''}}" href="/?tab=following">フォロー中</a>
+    </nav>
+
+    <section class="feed">
+      {% for p in posts %}
+      <article class="card postCard">
+        <div class="row">
+          <div class="avatar">{{ p.username[0]|upper }}</div>
+
+          <div class="grow">
+            <b>@{{p.username}}
+              {% if p.verified %}
+              <span class="check">✓</span>
+              {% endif %}
+            </b>
+            <div class="meta">⭐ {{'%.2f'|format(p.rating)}} ・ {{p.location or '場所未定'}}</div>
+          </div>
+
+          <span class="pill {{p.post_type}}">
+            {{'代行依頼' if p.post_type=='request' else '代行可能'}}
+          </span>
+        </div>
+
+        <a class="title" href="/post/{{p.id}}">{{p.title}}</a>
+        <p>{{p.body}}</p>
+
+        <div class="moneyLine">
+          <span>代行費</span>
+          <b>¥{{"{:,}".format(p.proxy_fee)}}</b>
+        </div>
+
+        <div class="postActions">
+          <form method="post" action="/post/{{p.id}}/like">
+            <button>♡ {{p.likes_count}}</button>
+          </form>
+
+          <a href="/post/{{p.id}}">💬 {{p.comments_count}}</a>
+          <a class="open" href="/post/{{p.id}}">詳細を見る →</a>
+        </div>
+      </article>
+
+      {% else %}
+      <div class="empty">まだ投稿がありません ☆</div>
+      {% endfor %}
+    </section>
+
+  {% elif view == 'search' %}
+
+    <section class="pageHead">
+      <h2>検索</h2>
+      <p>ブランド・場所・イベント名から探せます。</p>
+    </section>
+
+    <form class="searchbar" method="get">
+      <input name="q" value="{{q}}" placeholder="例：andwang / 渋谷 / POPUP">
+      <button>検索</button>
+    </form>
+
+    <section class="feed">
+      {% for p in posts %}
+      <article class="card postCard">
+        <div class="row">
+          <div class="avatar">{{p.username[0]|upper}}</div>
+
+          <div class="grow">
+            <b>@{{p.username}}</b>
+            <div class="meta">{{p.location}} ・ {{p.target_date}}</div>
+          </div>
+
+          <span class="pill {{p.post_type}}">
+            {{'代行依頼' if p.post_type=='request' else '代行可能'}}
+          </span>
+        </div>
+
+        <a class="title" href="/post/{{p.id}}">{{p.title}}</a>
+        <p>{{p.body}}</p>
+
+        <div class="moneyLine">
+          <span>代行費</span>
+          <b>¥{{"{:,}".format(p.proxy_fee)}}</b>
+        </div>
+      </article>
+
+      {% else %}
+      <div class="empty">キーワードを入れて検索してね ☆</div>
+      {% endfor %}
+    </section>
+
+  {% elif view == 'new_post' %}
+
+    <section class="pageHead">
+      <h2>投稿する</h2>
+      <p>「代行依頼」も「代行可能」もここから投稿できます。</p>
+    </section>
+
+    <form class="form card" method="post">
+
+      <label>
+        投稿タイプ
+        <select name="post_type">
+          <option value="request">代行依頼</option>
+          <option value="offer">代行可能</option>
+        </select>
+      </label>
+
+      <label>
+        タイトル
+        <input name="title" required placeholder="例：POPUP限定トップスを買ってほしい">
+      </label>
+
+      <label>
+        内容
+        <textarea name="body" required placeholder="商品名、サイズ、カラー、希望など"></textarea>
+      </label>
+
+      <div class="two">
+        <label>
+          場所
+          <input name="location" placeholder="渋谷">
+        </label>
+
+        <label>
+          日付
+          <input name="target_date" placeholder="9/12">
+        </label>
+      </div>
+
+      <div class="two">
+        <label>
+          商品予定価格
+          <input type="number" name="product_price" value="0">
+        </label>
+
+        <label>
+          代行費
+          <input type="number" name="proxy_fee" value="2000">
+        </label>
+      </div>
+
+      <button class="primary wide">投稿する ☆</button>
+    </form>
+
+  {% elif view == 'detail' %}
+
+    <section class="pageHead">
+      <h2>投稿詳細</h2>
+    </section>
+
+    <article class="card detail">
+      <div class="row">
+        <div class="avatar">{{post.username[0]|upper}}</div>
+
+        <div class="grow">
+          <b>@{{post.username}} ✓</b>
+          <div class="meta">⭐ {{post.rating}} ・ 成立率 {{post.success_rate}}%</div>
+        </div>
+
+        <span class="pill {{post.post_type}}">
+          {{'代行依頼' if post.post_type=='request' else '代行可能'}}
+        </span>
+      </div>
+
+      <h2>{{post.title}}</h2>
+      <p>{{post.body}}</p>
+
+      <div class="facts">
+        <div>
+          <small>場所</small>
+          <b>{{post.location or '-'}}</b>
+        </div>
+
+        <div>
+          <small>日付</small>
+          <b>{{post.target_date or '-'}}</b>
+        </div>
+
+        <div>
+          <small>代行費</small>
+          <b>¥{{"{:,}".format(post.proxy_fee)}}</b>
+        </div>
+      </div>
+    </article>
+
+    <section class="card">
+      <h3>応募する</h3>
+
+      <form method="post" action="/post/{{post.id}}/apply" class="form">
+
+        <label>
+          提案する代行費
+          <input type="number" name="fee_offer" value="{{post.proxy_fee}}">
+        </label>
+
+        <label>
+          メッセージ
+          <textarea name="message" placeholder="対応可能な日時など"></textarea>
+        </label>
+
+        <button class="primary wide">応募を送る</button>
+      </form>
+
+      {% for a in applications %}
+      <div class="application">
+        <b>@{{a.username}}</b>
+        <span>⭐ {{a.rating}} / 成立率 {{a.success_rate}}%</span>
+        <b>¥{{"{:,}".format(a.fee_offer)}}</b>
+      </div>
+      {% endfor %}
+    </section>
+
+    <section class="card">
+      <h3>コメント</h3>
+
+      {% for c in comments %}
+      <div class="comment">
+        <b>@{{c.username}}</b> {{c.body}}
+      </div>
+
+      {% else %}
+      <p class="meta">まだコメントはありません。</p>
+      {% endfor %}
+
+      <form method="post" action="/post/{{post.id}}/comment" class="inline">
+        <input name="body" placeholder="コメントする">
+        <button>送信</button>
+      </form>
+    </section>
+
+  {% elif view == 'transactions' %}
+
+    <section class="pageHead">
+      <h2>取引</h2>
+      <p>進行中の取引を確認できます。</p>
+    </section>
+
+    <section class="feed">
+      {% for tx in transactions %}
+      <article class="card">
+
+        <div class="row">
+          <div class="avatar">☆</div>
+
+          <div class="grow">
+            <b>{{tx.title}}</b>
+            <div class="meta">
+              依頼者 @{{tx.requester_name}} / 代行者 @{{tx.agent_name}}
+            </div>
+          </div>
+
+          <span class="status">{{tx.status}}</span>
+        </div>
+
+        <div class="moneyLine">
+          <span>合計予定</span>
+          <b>¥{{"{:,}".format(tx.product_price + tx.proxy_fee + tx.platform_fee + tx.shipping_estimate)}}</b>
+        </div>
+
+        <div class="postActions">
+          <a class="open" href="/transaction/{{tx.id}}?role=requester">取引を見る →</a>
+          <a href="/chat/{{tx.id}}">チャット</a>
+        </div>
+      </article>
+
+      {% else %}
+      <div class="empty">取引はまだありません。</div>
+      {% endfor %}
+    </section>
+
+  {% elif view == 'transaction' %}
+
+    <section class="pageHead">
+      <h2>取引画面</h2>
+      <p>{{'依頼者側' if role=='requester' else '代行者側'}}ビュー</p>
+    </section>
+
+    <div class="roleSwitch">
+      <a class="{{'active' if role=='requester' else ''}}" href="/transaction/{{tx.id}}?role=requester">依頼者側</a>
+      <a class="{{'active' if role=='agent' else ''}}" href="/transaction/{{tx.id}}?role=agent">代行者側</a>
+    </div>
+
+    <section class="card">
+
+      <div class="row">
+        <b class="grow">{{tx.title}}</b>
+        <span class="status">{{tx.status}}</span>
+      </div>
+
+      <div class="steps">
+        <i class="on"></i>
+        <i class="on"></i>
+        <i class="on"></i>
+        <i></i>
+        <i></i>
+      </div>
+
+      <div class="moneyLine">
+        <span>商品代</span>
+        <b>¥{{"{:,}".format(tx.product_price)}}</b>
+      </div>
+
+      <div class="moneyLine">
+        <span>代行費</span>
+        <b>¥{{"{:,}".format(tx.proxy_fee)}}</b>
+      </div>
+
+      <div class="moneyLine">
+        <span>H☆SHI手数料 5.5%</span>
+        <b>¥{{"{:,}".format(tx.platform_fee)}}</b>
+      </div>
+
+      <div class="moneyLine">
+        <span>送料見込み</span>
+        <b>¥{{"{:,}".format(tx.shipping_estimate)}}</b>
+      </div>
+
+    </section>
+
+    {% if role == 'requester' %}
+
+    <section class="card">
+      <h3>購入証明</h3>
+
+      <div class="proofState">
+        {{'✓ レシート添付済み' if tx.receipt_attached else '未添付'}}
+      </div>
+
+      <h3>商品写真</h3>
+
+      <div class="photoGrid">
+        {% for p in proofs if p.kind=='item_photo' %}
+        <img src="/uploads/{{p.filename}}" alt="商品写真">
+
+        {% else %}
+        <div class="photo">☆<small>正面</small></div>
+        <div class="photo">☆<small>背面</small></div>
+        <div class="photo">☆<small>付属品</small></div>
+        {% endfor %}
+      </div>
+
+      <a class="primary wide btnLink" href="/chat/{{tx.id}}">チャットを開く</a>
+    </section>
+
+    {% else %}
+
+    <section class="card">
+      <h3>購入証明を添付</h3>
+
+      <form method="post" action="/transaction/{{tx.id}}/upload" enctype="multipart/form-data" class="upload">
+        <input type="hidden" name="kind" value="receipt">
+        <input type="file" name="file" required>
+        <button>レシート/決済明細を添付</button>
+      </form>
+
+      <h3>商品写真を添付</h3>
+
+      <form method="post" action="/transaction/{{tx.id}}/upload" enctype="multipart/form-data" class="upload">
+        <input type="hidden" name="kind" value="item_photo">
+        <input type="file" name="file" accept="image/*" required>
+        <button>商品写真を追加</button>
+      </form>
+
+      <div class="address">
+        <b>配送先</b>
+        <p>東京都 ○○区 ○○ 1-2-3</p>
+        <small>取引中のみ表示。取引終了後は非表示。</small>
+      </div>
+
+      <div class="code">
+        手渡し/ロッカー 6桁コード
+        <b>{{tx.delivery_code}}</b>
+      </div>
+
+      <a class="primary wide btnLink" href="/chat/{{tx.id}}">チャットを開く</a>
+    </section>
+
+    {% endif %}
+
+  {% elif view == 'chat' %}
+
+    <section class="pageHead">
+      <h2>チャット</h2>
+      <p>{{tx.title}}</p>
+    </section>
+
+    <section class="card chat">
+
+      <div class="chatTop">
+        <span>@{{tx.requester_name}}</span>
+        <span>⇄</span>
+        <span>@{{tx.agent_name}}</span>
+      </div>
+
+      {% for m in messages %}
+
+      <div class="bubble {{'mine' if m.user_id==user.id else ''}}">
+        <b>@{{m.username}}</b><br>
+        {{m.body}}
+      </div>
+
+      {% else %}
+      <p class="meta">まだメッセージはありません。</p>
+      {% endfor %}
+
+      <form method="post" action="/transaction/{{tx.id}}/message" class="inline">
+        <input name="body" placeholder="メッセージを入力">
+        <button>送信</button>
+      </form>
+
+      <a class="soft wide btnLink" href="/transaction/{{tx.id}}?role=requester">取引画面へ戻る</a>
+    </section>
+
+  {% elif view == 'profile' %}
+
+    <section class="profileHero card">
+      <div class="bigStar">☆</div>
+      <h2>@{{user.username}}</h2>
+      <div class="verified">本人確認済み ✓</div>
+      <p>⭐ {{user.rating}} / 取引成立率 {{user.success_rate}}%</p>
+
+      <div class="balance">
+        H☆SHI残高
+        <b>¥{{"{:,}".format(user.balance)}}</b>
+      </div>
+    </section>
+
+    <section class="sectionLabel">自分の投稿</section>
+
+    <section class="feed">
+      {% for p in myposts %}
+      <article class="card">
+
+        <span class="pill {{p.post_type}}">
+          {{'代行依頼' if p.post_type=='request' else '代行可能'}}
+        </span>
+
+        <a class="title" href="/post/{{p.id}}">{{p.title}}</a>
+
+        <div class="meta">{{p.status}}</div>
+      </article>
+
+      {% else %}
+      <div class="empty">まだ投稿がありません。</div>
+      {% endfor %}
+    </section>
+
+  {% endif %}
+
+  </main>
+
+  <nav class="bottom">
+
+    <a class="{{'active' if view=='home' else ''}}" href="/">
+      ⌂
+      <span>ホーム</span>
+    </a>
+
+    <a class="{{'active' if view=='search' else ''}}" href="/search">
+      ⌕
+      <span>検索</span>
+    </a>
+
+    <a class="post {{'active' if view=='new_post' else ''}}" href="/post/new">
+      ＋
+      <span>投稿</span>
+    </a>
+
+    <a class="{{'active' if view in ['transactions','transaction','chat'] else ''}}" href="/transactions">
+      ✉
+      <span>取引</span>
+    </a>
+
+    <a class="{{'active' if view=='profile' else ''}}" href="/profile">
+      ☆
+      <span>マイページ</span>
+    </a>
+
+  </nav>
+</div>
+</body>
+</html>
